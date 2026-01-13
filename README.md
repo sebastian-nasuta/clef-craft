@@ -1,6 +1,6 @@
-# ClefCraft - Superhero Music Quiz 🦸‍♂️🎵
+# ClefCraft - Music Quiz 🎵
 
-ClefCraft is a vibrant, interactive Flutter application designed to help users learn musical notes on the treble clef. It features a highly stylized **Comic Book / Superhero aesthetic** with dynamic visual and audio feedback.
+ClefCraft is a project entirely created using **vibe coding**. It focuses on fast iteration, aesthetics, and high-level concepts to help users learn musical notes on the treble clef.
 
 ## Live Demo 🌐
 
@@ -9,19 +9,19 @@ Check out the live application here: **[https://sebastian-nasuta.github.io/clef-
 ## Features 🚀
 
 - **Interactive Note Quiz**: Learn to identify notes on the musical staff.
-- **Superhero Visuals**:
+- **Dynamic Visuals**:
   - **Success**: A "Sweet Note" effect where colorful musical symbols fly out.
   - **Incorrect Answer**: A "Radial Hellfire" explosion that engulfs the button.
 - **Immersive Sound Effects**:
   - **Success**: A happy C-Major arpeggio synthesised specifically for this project.
   - **Fire**: A realistic crackling and rumbling fire sound for incorrect guesses.
 - **Glassmorphism UI**: A modern, high-contrast dark theme with translucent elements.
-- **Dynamic Background**: Custom-generated superhero-themed background.
+- **Custom Background**: Custom-generated atmospheric background.
 
 ## Technology Stack 🛠️
 
 - **Flutter**: Cross-platform framework.
-- **Google Fonts (Bangers)**: For that classic comic book typography.
+- **Google Fonts (Bangers)**: For classic comic-style typography.
 - **Audioplayers**: For high-quality sound feedback.
 - **Custom Painters**: Most visual effects (notes, staff, fire, etc.) are drawn directly on the canvas using Flutter's `CustomPainter`.
 
