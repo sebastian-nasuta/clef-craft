@@ -714,6 +714,7 @@ class _RadialFireButtonState extends State<RadialFireButton> with SingleTickerPr
   late AnimationController _controller;
   final List<FireParticle> _particles = [];
   final Random _random = Random();
+  Offset _lastTapPos = const Offset(50, 50); // Default to center
 
   @override
   void initState() {
@@ -734,17 +735,17 @@ class _RadialFireButtonState extends State<RadialFireButton> with SingleTickerPr
   void _updateFire() {
     if (widget.isBurning) {
       // Spawn batch
-      for(int i=0; i<10; i++) {
+      for(int i=0; i<12; i++) {
         if (_particles.length < 300) {
            double angle = _random.nextDouble() * 2 * pi;
-           double speed = _random.nextDouble() * 3 + 2;
+           double speed = _random.nextDouble() * 4 + 1;
            
           _particles.add(FireParticle(
-            x: 50, // Center of 100x100 coord space
-            y: 50, 
-            vx: cos(angle) * speed,
-            vy: sin(angle) * speed,
-            size: _random.nextDouble() * 20 + 10,
+            x: _lastTapPos.dx, 
+            y: _lastTapPos.dy, 
+            vx: cos(angle) * speed * 0.5, // Less explosive radial
+            vy: sin(angle) * speed - 2.0, // Initial upward burst
+            size: _random.nextDouble() * 15 + 10,
             life: 1.0,
           ));
         }
@@ -755,8 +756,10 @@ class _RadialFireButtonState extends State<RadialFireButton> with SingleTickerPr
       var p = _particles[i];
       p.x += p.vx;
       p.y += p.vy;
-      p.size *= 0.95; // Shrink
-      p.life -= 0.03; // Fade
+      p.vy -= 0.15; // Heat rising (gravity in reverse)
+      p.vx += (sin(_controller.value * 10 + i) * 0.2); // Flickering wiggle
+      p.size *= 0.94; // Shrink
+      p.life -= 0.025; // Fade
       
       if (p.life <= 0 || p.size < 0.5) {
         _particles.removeAt(i);
@@ -767,26 +770,27 @@ class _RadialFireButtonState extends State<RadialFireButton> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      alignment: Alignment.center,
-      children: [
-        widget.child,
-        if (_particles.isNotEmpty)
-          Positioned(
-             // Center 100x100 canvas over the button (approx 70x70)
-             top: -50,
-             bottom: -50,
-             left: -50,
-             right: -50,
-             child: IgnorePointer(
-               child: CustomPaint(
-                 painter: RadialFirePainter(_particles),
+    return Listener(
+      onPointerDown: (event) {
+        setState(() {
+          _lastTapPos = event.localPosition;
+        });
+      },
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          widget.child,
+          if (_particles.isNotEmpty)
+            Positioned.fill(
+               child: IgnorePointer(
+                 child: CustomPaint(
+                   painter: RadialFirePainter(_particles),
+                 ),
                ),
-             ),
-          ),
-          // Removing ZAP text to focus on the "Hellfire" visual as requested
-      ],
+            ),
+        ],
+      ),
     );
   }
 }
@@ -802,30 +806,48 @@ class RadialFirePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final strokePaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
     for (var p in particles) {
       Color color;
-      // Heat Gradient
-      if (p.life > 0.8) {
-        color = Colors.white.withOpacity(0.9);
-      } else if (p.life > 0.5) {
-        color = Colors.yellowAccent.withOpacity(0.7);
-      } else if (p.life > 0.2) {
-        color = Colors.orangeAccent.withOpacity(0.5);
+      if (p.life > 0.6) {
+        color = const Color(0xFFFFEB3B); // Yellow
+      } else if (p.life > 0.3) {
+        color = const Color(0xFFFF9800); // Orange
       } else {
-        color = Colors.deepOrange.withOpacity(0.3);
+        color = const Color(0xFFF44336); // Red
       }
 
-      final paint = Paint()
-        ..color = color
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5) // Glow
-        ..blendMode = BlendMode.screen; // Additive
+      final fillPaint = Paint()
+        ..color = color.withOpacity(p.life)
+        ..style = PaintingStyle.fill;
+
+      // Draw a "Flame" shape - teardrop-like flicker
+      final path = Path();
+      double w = p.size;
+      double h = p.size * 1.8; // Tall flames
+
+      // Bottom curves
+      path.moveTo(p.x - w/2, p.y);
+      path.quadraticBezierTo(p.x - w/2, p.y + w/2, p.x, p.y + w/2);
+      path.quadraticBezierTo(p.x + w/2, p.y + w/2, p.x + w/2, p.y);
       
-      canvas.drawCircle(Offset(p.x, p.y), p.size, paint);
+      // Top flickering tip
+      path.quadraticBezierTo(p.x + w/4, p.y - h/2, p.x, p.y - h);
+      path.quadraticBezierTo(p.x - w/4, p.y - h/2, p.x - w/2, p.y);
+      
+      path.close();
+
+      canvas.drawPath(path, fillPaint);
+      canvas.drawPath(path, strokePaint..color = Colors.black.withOpacity(p.life));
     }
   }
 
   @override
-  bool shouldRepaint(covariant RadialFirePainter oldDelegate) => true; 
+  bool shouldRepaint(covariant RadialFirePainter oldDelegate) => true;
 }
 
 class Shaker extends StatelessWidget {
