@@ -2,6 +2,10 @@
 
 ClefCraft is a vibrant, interactive Flutter application designed to help users learn musical notes on the treble clef. It features a highly stylized **Comic Book / Superhero aesthetic** with dynamic visual and audio feedback.
 
+## Live Demo 🌐
+
+Check out the live application here: **[https://sebastian-nasuta.github.io/clef-craft/](https://sebastian-nasuta.github.io/clef-craft/)**
+
 ## Features 🚀
 
 - **Interactive Note Quiz**: Learn to identify notes on the musical staff.
